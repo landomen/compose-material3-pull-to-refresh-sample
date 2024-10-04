@@ -64,7 +64,7 @@ private fun HomeScreenContent(
     modifier: Modifier = Modifier,
 
     ) {
-    PullToRefreshBox(
+    PullToRefreshWrapper(
         onRefreshTrigger = onRefreshTrigger,
         modifier = modifier
     ) {
@@ -74,7 +74,7 @@ private fun HomeScreenContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun PullToRefreshBox(
+internal fun PullToRefreshWrapper(
     onRefreshTrigger: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
