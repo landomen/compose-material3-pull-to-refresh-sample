@@ -12,7 +12,7 @@ class AnimalFactsService(private val httpClient: HttpClient) : AnimalFactsRemote
     override suspend fun getAnimalFacts(): List<AnimalFact> {
         val facts: AnimalFactsApiResponse = httpClient.get("https://dog-api.kinduff.com/api/facts?number=10").body()
         return facts.facts.mapIndexed { id, fact ->
-            AnimalFact(id, fact)
+            AnimalFact(id + 1, fact)
         }
     }
 }

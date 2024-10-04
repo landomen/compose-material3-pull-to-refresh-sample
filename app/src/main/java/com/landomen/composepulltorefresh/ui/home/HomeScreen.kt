@@ -4,9 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -15,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -55,44 +59,48 @@ internal fun HomeScreen(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenContent(
     state: HomeScreenState,
     onRefreshTrigger: () -> Unit,
-    modifier: Modifier = Modifier,
-
-    ) {
-    PullToRefreshWrapper(
-        isRefreshing = state.isLoading,
-        onRefreshTrigger = onRefreshTrigger,
+    modifier: Modifier = Modifier
+) {
+    PullToRefreshBox(
+        isRefreshing = state.isRefreshing,
+        onRefresh = onRefreshTrigger,
+        contentAlignment = Alignment.TopStart,
         modifier = modifier
     ) {
         AnimalFactsList(state.items)
     }
 }
 
+/**
+ * This essentially copies PullToRefreshBox since we can't use it directly
+ * as it doesn't expose enabled parameter, which we need to disable pull-to-refresh
+ * in offline mode
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PullToRefreshWrapper(
     isRefreshing: Boolean,
-    onRefreshTrigger: () -> Unit,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
     enabled: Boolean = true,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val refreshState = rememberPullToRefreshState()
 
-    // This essentially copies PullToRefreshBox since we can't use it directly
-    // as it doesn't expose enabled parameter, which we need to disable pull-to-refresh
-    // in offline mode
     Box(
         modifier.pullToRefresh(
             state = refreshState,
             isRefreshing = isRefreshing,
-            onRefresh = onRefreshTrigger,
+            onRefresh = onRefresh,
             enabled = enabled,
         ),
-        contentAlignment = Alignment.TopStart,
+        contentAlignment = contentAlignment,
     ) {
         content()
         Indicator(
@@ -102,7 +110,6 @@ internal fun PullToRefreshWrapper(
         )
     }
 }
-
 
 @Composable
 private fun AnimalFactsList(facts: List<AnimalFact>) {
@@ -123,16 +130,23 @@ private fun AnimalFactItem(fact: AnimalFact) {
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
+            Text(
+                text = fact.id.toString(),
+                style = MaterialTheme.typography.headlineMedium,
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
             Text(
                 text = fact.fact,
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.CenterStart)
             )
         }
     }
