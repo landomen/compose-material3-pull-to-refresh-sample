@@ -15,14 +15,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,7 +29,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.landomen.composepulltorefresh.R
 import com.landomen.composepulltorefresh.data.animalfact.model.AnimalFact
 import com.landomen.composepulltorefresh.ui.theme.ComposePullToRefreshTheme
-import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,6 +63,7 @@ private fun HomeScreenContent(
 
     ) {
     PullToRefreshWrapper(
+        isRefreshing = state.isLoading,
         onRefreshTrigger = onRefreshTrigger,
         modifier = modifier
     ) {
@@ -75,26 +74,32 @@ private fun HomeScreenContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PullToRefreshWrapper(
+    isRefreshing: Boolean,
     onRefreshTrigger: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val refreshState = rememberPullToRefreshState(enabled = { enabled })
+    val refreshState = rememberPullToRefreshState()
 
-    if (refreshState.isRefreshing) {
-        LaunchedEffect(true) {
-            onRefreshTrigger()
-            delay(1000)
-            refreshState.endRefresh()
-        }
-    }
-
+    // This essentially copies PullToRefreshBox since we can't use it directly
+    // as it doesn't expose enabled parameter, which we need to disable pull-to-refresh
+    // in offline mode
     Box(
-        modifier = modifier.nestedScroll(refreshState.nestedScrollConnection),
+        modifier.pullToRefresh(
+            state = refreshState,
+            isRefreshing = isRefreshing,
+            onRefresh = onRefreshTrigger,
+            enabled = enabled,
+        ),
+        contentAlignment = Alignment.TopStart,
     ) {
         content()
-        PullToRefreshContainer(state = refreshState, modifier = Modifier.align(Alignment.TopCenter))
+        Indicator(
+            modifier = Modifier.align(Alignment.TopCenter),
+            isRefreshing = isRefreshing,
+            state = refreshState,
+        )
     }
 }
 

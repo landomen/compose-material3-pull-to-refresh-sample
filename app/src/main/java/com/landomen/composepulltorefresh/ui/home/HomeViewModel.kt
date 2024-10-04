@@ -15,8 +15,6 @@ import kotlinx.coroutines.launch
 class HomeViewModel(private val animalFactsRepository: AnimalFactsRepository) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
-
-    private val _screenState = MutableStateFlow(HomeScreenState())
     val screenState: StateFlow<HomeScreenState> = animalFactsRepository.observeAnimalFacts()
         .combine(_isLoading) { items, isLoading ->
             HomeScreenState(items = items, isLoading = isLoading)
@@ -34,10 +32,10 @@ class HomeViewModel(private val animalFactsRepository: AnimalFactsRepository) : 
     }
 
     fun onPullToRefreshTrigger() {
-        _screenState.update { it.copy(isLoading = true) }
+        _isLoading.update { true }
         viewModelScope.launch {
             animalFactsRepository.fetchAnimalFacts()
-            _screenState.update { it.copy(isLoading = false) }
+            _isLoading.update { false }
         }
     }
 }

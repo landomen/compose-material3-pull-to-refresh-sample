@@ -8,11 +8,11 @@ import com.landomen.composepulltorefresh.data.animalfact.remote.AnimalFactsRemot
 import com.landomen.composepulltorefresh.data.animalfact.remote.AnimalFactsService
 import com.landomen.composepulltorefresh.ui.home.HomeViewModel
 import io.ktor.client.HttpClient
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.features.logging.Logger
-import io.ktor.client.features.logging.Logging
-import io.ktor.client.features.observer.ResponseObserver
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.observer.ResponseObserver
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -27,8 +27,8 @@ class MainApp : Application() {
 
         single {
             HttpClient {
-                install(JsonFeature) {
-                    serializer = KotlinxSerializer(Json {
+                install(ContentNegotiation) {
+                    json(Json {
                         ignoreUnknownKeys = true
                         isLenient = true
                         encodeDefaults = true
