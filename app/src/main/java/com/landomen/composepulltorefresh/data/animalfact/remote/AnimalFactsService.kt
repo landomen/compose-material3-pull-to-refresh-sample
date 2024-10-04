@@ -10,9 +10,15 @@ import io.ktor.client.request.request
 class AnimalFactsService(private val httpClient: HttpClient) : AnimalFactsRemote {
 
     override suspend fun getAnimalFacts(): List<AnimalFact> {
-        val facts: AnimalFactsApiResponse = httpClient.get("https://dog-api.kinduff.com/api/facts?number=10").body()
+        val facts: AnimalFactsApiResponse = httpClient.get("$BASE_URL$FACTS_ENDPOINT").body()
         return facts.facts.mapIndexed { id, fact ->
             AnimalFact(id + 1, fact)
         }
+    }
+
+    companion object {
+        // https://kinduff.github.io/dog-api/
+        private const val BASE_URL = "https://dog-api.kinduff.com/api"
+        private const val FACTS_ENDPOINT = "/facts?number=10"
     }
 }
